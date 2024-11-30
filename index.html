@@ -92,6 +92,7 @@
                 return;
             }
 
+            console.log('Démarrage du minage avec l\'adresse :', walletAddress); // Log de l'adresse
             statusDiv.textContent = 'Statut : Démarrage du minage...';
 
             // Création d'une instance du mineur
@@ -101,22 +102,28 @@
                 throttle: 0.3                          // Limite l'utilisation du CPU
             });
 
+            // Vérifier si le mineur se connecte correctement
+            console.log('Tentative de démarrage du mineur avec l\'URL : wss://gulf.moneroocean.stream');
             miner.start();
 
-            // Affichage des mises à jour de statut
+            // Vérifier si le mineur a démarré correctement
             miner.on('open', () => {
+                console.log('Connexion au pool réussie');
                 statusDiv.textContent = 'Statut : Minage démarré !';
             });
 
             miner.on('close', () => {
+                console.log('Minage arrêté');
                 statusDiv.textContent = 'Statut : Minage arrêté.';
             });
 
             miner.on('error', (error) => {
+                console.error('Erreur du mineur:', error); // Log d'erreur
                 statusDiv.textContent = `Erreur : ${error.message}`;
             });
 
             miner.on('update', (stats) => {
+                console.log('Mise à jour des statistiques :', stats); // Log des statistiques
                 hashesDiv.textContent = `Hachages : ${stats.hashes}`;
                 rateDiv.textContent = `H/s : ${stats.hashRate}`;
             });
@@ -127,6 +134,7 @@
 
         stopBtn.addEventListener('click', () => {
             if (miner) {
+                console.log('Arrêt du minage');
                 miner.stop();
             }
             statusDiv.textContent = "Statut : Minage arrêté.";
