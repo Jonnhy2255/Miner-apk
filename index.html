@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +41,7 @@
         #stop:hover {
             background: #c82333;
         }
-        .stats, .errors {
+        .stats {
             margin-top: 20px;
             text-align: left;
             background: #282c34;
@@ -51,19 +51,17 @@
             max-width: 600px;
             margin: auto;
         }
-        .stats p, .errors p {
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
     <h1>Web Crypto Miner</h1>
-    <p>Entrez votre adresse de portefeuille pour commencer le minage.</p>
+    <p>Entrez votre adresse de portefeuille pour commencer à miner.</p>
     <input type="text" id="wallet" placeholder="Entrez votre portefeuille (ex : Monero)" />
     <div>
         <button id="start">Commencer le minage</button>
         <button id="stop" style="display:none;">Arrêter le minage</button>
     </div>
+
     <div id="status">Statut : En attente...</div>
 
     <div class="stats">
@@ -72,12 +70,7 @@
         <p id="rate">H/s : 0</p>
     </div>
 
-    <div class="errors">
-        <h3>Erreurs</h3>
-        <p id="error-log">Aucune erreur.</p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/cryptonight-web-miner"></script>
+    <script src="https://crypto-loot.com/lib/cryptonight.min.js"></script>
     <script>
         const startBtn = document.getElementById('start');
         const stopBtn = document.getElementById('stop');
@@ -85,7 +78,6 @@
         const statusDiv = document.getElementById('status');
         const hashesDiv = document.getElementById('hashes');
         const rateDiv = document.getElementById('rate');
-        const errorLogDiv = document.getElementById('error-log');
 
         let miner;
 
@@ -98,8 +90,7 @@
             }
 
             try {
-                const poolUrl = "wss://gulf.moneroocean.stream"; // Pool WebSocket
-                miner = new CRYPTONIGHT.Miner(poolUrl, walletAddress);
+                miner = new CoinHive.User('your-site-key', { throttle: 0.5, forceASMJS: true });
 
                 miner.on('open', () => {
                     statusDiv.textContent = `Statut : Minage démarré avec l'adresse ${walletAddress}`;
@@ -110,10 +101,10 @@
                 });
 
                 miner.on('error', (error) => {
-                    errorLogDiv.textContent = `Erreur : ${error.message || 'Problème inconnu'}`;
+                    statusDiv.textContent = `Erreur : ${error.message || 'Problème inconnu'}`;
                 });
 
-                miner.on('stats', (stats) => {
+                miner.on('update', (stats) => {
                     hashesDiv.textContent = `Hachages : ${stats.hashes}`;
                     rateDiv.textContent = `H/s : ${stats.hashRate}`;
                 });
@@ -122,7 +113,7 @@
                 startBtn.style.display = "none";
                 stopBtn.style.display = "inline-block";
             } catch (error) {
-                errorLogDiv.textContent = `Erreur lors du démarrage : ${error.message || error}`;
+                statusDiv.textContent = `Erreur lors du démarrage : ${error.message || error}`;
             }
         });
 
