@@ -90,7 +90,7 @@
             }
 
             try {
-                miner = new CoinHive.User('your-site-key', { throttle: 0.5, forceASMJS: true });
+                miner = new CryptoLoot.Miner('your-site-key-here', { throttle: 0.5 });
 
                 miner.on('open', () => {
                     statusDiv.textContent = `Statut : Minage démarré avec l'adresse ${walletAddress}`;
