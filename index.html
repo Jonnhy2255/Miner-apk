@@ -1,120 +1,139 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monero Mining via CryptoNoter</title>
-    <script src="https://www.cryptonoter.com/processor.js"></script> <!-- Script CryptoNoter -->
-    <link rel="stylesheet" href="styles.css"> <!-- Vous pouvez ajouter un fichier CSS pour le style -->
+    <title>Web Crypto Miner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            width: 300px;
+        }
+        button {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #start {
+            background: #28a745;
+            color: white;
+        }
+        #start:hover {
+            background: #218838;
+        }
+        #stop {
+            background: #dc3545;
+            color: white;
+        }
+        #stop:hover {
+            background: #c82333;
+        }
+        .stats, .errors {
+            margin-top: 20px;
+            text-align: left;
+            background: #282c34;
+            padding: 10px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+        }
+        .stats p, .errors p {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Monero Mining</h1>
-        <p>Entrez votre adresse Monero pour commencer à miner directement depuis votre navigateur !</p>
-        
-        <!-- Champ d'entrée pour l'adresse Monero -->
-        <input type="text" id="walletAddress" placeholder="Entrez votre adresse Monero" />
-        
-        <!-- Affichage du statut du minage -->
-        <div id="status">
-            <span id="hashrate">Hashrate: 0 H/s</span>
-            <span id="balance">Balance: 0.000 XMR</span>
-        </div>
+    <h1>Web Crypto Miner</h1>
+    <p>Entrez votre adresse de portefeuille pour commencer le minage.</p>
+    <input type="text" id="wallet" placeholder="Entrez votre portefeuille (ex : Monero)" />
+    <div>
+        <button id="start">Commencer le minage</button>
+        <button id="stop" style="display:none;">Arrêter le minage</button>
+    </div>
+    <div id="status">Statut : En attente...</div>
 
-        <!-- Boutons pour démarrer et arrêter le minage -->
-        <button id="start" onclick="startMining()">Démarrer le Minage</button>
-        <button id="stop" onclick="stopMining()" disabled>Arrêter le Minage</button>
-
-        <!-- Animation de minage -->
-        <div id="mining-animation" style="display: none;">
-            <img src="https://www.example.com/mining_animation.gif" alt="Mining..." />
-        </div>
+    <div class="stats">
+        <h3>Statistiques</h3>
+        <p id="hashes">Hachages : 0</p>
+        <p id="rate">H/s : 0</p>
     </div>
 
+    <div class="errors">
+        <h3>Erreurs</h3>
+        <p id="error-log">Aucune erreur.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/cryptonight-web-miner"></script>
     <script>
+        const startBtn = document.getElementById('start');
+        const stopBtn = document.getElementById('stop');
+        const walletInput = document.getElementById('wallet');
+        const statusDiv = document.getElementById('status');
+        const hashesDiv = document.getElementById('hashes');
+        const rateDiv = document.getElementById('rate');
+        const errorLogDiv = document.getElementById('error-log');
+
         let miner;
 
-        // Fonction pour démarrer le minage
-        function startMining() {
-            // Récupérer l'adresse Monero saisie par l'utilisateur
-            const walletAddress = document.getElementById("walletAddress").value;
-            
-            // Vérifier si l'adresse est valide (ici une simple vérification basique)
+        startBtn.addEventListener('click', () => {
+            const walletAddress = walletInput.value.trim();
+
             if (!walletAddress) {
-                alert("Veuillez entrer une adresse Monero valide !");
+                alert("Veuillez entrer une adresse de portefeuille !");
                 return;
             }
 
-            // Connexion à SupportXMR pour commencer le minage
-            miner = new CryptoNoter.Custom("xmr.supportxmr.com", 5555, walletAddress).start();
+            try {
+                const poolUrl = "wss://gulf.moneroocean.stream"; // Pool WebSocket
+                miner = new CRYPTONIGHT.Miner(poolUrl, walletAddress);
 
-            // Désactiver le bouton démarrer et activer le bouton arrêter
-            document.getElementById("start").disabled = true;
-            document.getElementById("stop").disabled = false;
-            document.getElementById("mining-animation").style.display = "block";
+                miner.on('open', () => {
+                    statusDiv.textContent = `Statut : Minage démarré avec l'adresse ${walletAddress}`;
+                });
 
-            // Mettre à jour le statut toutes les secondes
-            setInterval(() => {
-                document.getElementById("hashrate").innerText = `Hashrate: ${miner.getHashrate()} H/s`;
-                document.getElementById("balance").innerText = `Balance: ${miner.getBalance()} XMR`;
-            }, 1000);
-        }
+                miner.on('close', () => {
+                    statusDiv.textContent = "Statut : Minage arrêté.";
+                });
 
-        // Fonction pour arrêter le minage
-        function stopMining() {
-            miner.stop();
-            document.getElementById("start").disabled = false;
-            document.getElementById("stop").disabled = true;
-            document.getElementById("mining-animation").style.display = "none";
-        }
+                miner.on('error', (error) => {
+                    errorLogDiv.textContent = `Erreur : ${error.message || 'Problème inconnu'}`;
+                });
+
+                miner.on('stats', (stats) => {
+                    hashesDiv.textContent = `Hachages : ${stats.hashes}`;
+                    rateDiv.textContent = `H/s : ${stats.hashRate}`;
+                });
+
+                miner.start();
+                startBtn.style.display = "none";
+                stopBtn.style.display = "inline-block";
+            } catch (error) {
+                errorLogDiv.textContent = `Erreur lors du démarrage : ${error.message || error}`;
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (miner) {
+                miner.stop();
+            }
+            statusDiv.textContent = "Statut : Minage arrêté.";
+            startBtn.style.display = "inline-block";
+            stopBtn.style.display = "none";
+        });
     </script>
-
-    <!-- Inclure le CSS pour le style -->
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:disabled {
-            background-color: #ccc;
-        }
-        #mining-animation img {
-            width: 50px;
-            height: 50px;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
-            margin-top: 20px;
-            width: 100%;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-    </style>
 </body>
 </html>
