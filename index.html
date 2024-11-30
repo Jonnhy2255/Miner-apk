@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monero Mining via CryptoNoter</title>
+    <script src="https://www.cryptonoter.com/processor.js"></script> <!-- Script CryptoNoter -->
+    <link rel="stylesheet" href="styles.css"> <!-- Vous pouvez ajouter un fichier CSS pour le style -->
+</head>
+<body>
+    <div class="container">
+        <h1>Monero Mining</h1>
+        <p>Entrez votre adresse Monero pour commencer à miner directement depuis votre navigateur !</p>
+        
+        <!-- Champ d'entrée pour l'adresse Monero -->
+        <input type="text" id="walletAddress" placeholder="Entrez votre adresse Monero" />
+        
+        <!-- Affichage du statut du minage -->
+        <div id="status">
+            <span id="hashrate">Hashrate: 0 H/s</span>
+            <span id="balance">Balance: 0.000 XMR</span>
+        </div>
+
+        <!-- Boutons pour démarrer et arrêter le minage -->
+        <button id="start" onclick="startMining()">Démarrer le Minage</button>
+        <button id="stop" onclick="stopMining()" disabled>Arrêter le Minage</button>
+
+        <!-- Animation de minage -->
+        <div id="mining-animation" style="display: none;">
+            <img src="https://www.example.com/mining_animation.gif" alt="Mining..." />
+        </div>
+    </div>
+
+    <script>
+        let miner;
+
+        // Fonction pour démarrer le minage
+        function startMining() {
+            // Récupérer l'adresse Monero saisie par l'utilisateur
+            const walletAddress = document.getElementById("walletAddress").value;
+            
+            // Vérifier si l'adresse est valide (ici une simple vérification basique)
+            if (!walletAddress) {
+                alert("Veuillez entrer une adresse Monero valide !");
+                return;
+            }
+
+            // Connexion à SupportXMR pour commencer le minage
+            miner = new CryptoNoter.Custom("xmr.supportxmr.com", 5555, walletAddress).start();
+
+            // Désactiver le bouton démarrer et activer le bouton arrêter
+            document.getElementById("start").disabled = true;
+            document.getElementById("stop").disabled = false;
+            document.getElementById("mining-animation").style.display = "block";
+
+            // Mettre à jour le statut toutes les secondes
+            setInterval(() => {
+                document.getElementById("hashrate").innerText = `Hashrate: ${miner.getHashrate()} H/s`;
+                document.getElementById("balance").innerText = `Balance: ${miner.getBalance()} XMR`;
+            }, 1000);
+        }
+
+        // Fonction pour arrêter le minage
+        function stopMining() {
+            miner.stop();
+            document.getElementById("start").disabled = false;
+            document.getElementById("stop").disabled = true;
+            document.getElementById("mining-animation").style.display = "none";
+        }
+    </script>
+
+    <!-- Inclure le CSS pour le style -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        #mining-animation img {
+            width: 50px;
+            height: 50px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</body>
+</html>
