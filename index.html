@@ -4,57 +4,495 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chat App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#5D5CDE",
-                        secondary: "#7D7CF0",
-                        success: "#4CAF50",
-                        lightBg: "#F8F9FA",
-                        darkBg: "#121212"
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         /* Styles de base */
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
         }
         
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: #333333;
+        }
+        
+        body.dark {
+            background-color: #121212;
+            color: #F5F5F5;
+        }
+        
+        /* Variables CSS avec fallback pour iOS 12 */
+        :root {
+            --theme-primary: #5D5CDE;
+            --theme-secondary: #7D7CF0;
+            --theme-success: #4CAF50;
+            --theme-light-bg: #F8F9FA;
+            --theme-dark-bg: #121212;
+        }
+        
+        /* Couleurs de thèmes prédéfinies (pour les navigateurs qui ne supportent pas les variables CSS) */
+        .theme-default .bg-primary, .send-button, .nav-btn.active, .chat-bubble.sent {
+            background-color: #5D5CDE;
+        }
+        .theme-blue .bg-primary, .theme-blue .send-button, .theme-blue .nav-btn.active, .theme-blue .chat-bubble.sent {
+            background-color: #2196F3;
+        }
+        .theme-green .bg-primary, .theme-green .send-button, .theme-green .nav-btn.active, .theme-green .chat-bubble.sent {
+            background-color: #4CAF50;
+        }
+        .theme-purple .bg-primary, .theme-purple .send-button, .theme-purple .nav-btn.active, .theme-purple .chat-bubble.sent {
+            background-color: #9C27B0;
+        }
+        .theme-orange .bg-primary, .theme-orange .send-button, .theme-orange .nav-btn.active, .theme-orange .chat-bubble.sent {
+            background-color: #FF9800;
+        }
+        
+        /* Couleurs pour le texte */
+        .text-primary {
+            color: #5D5CDE;
+        }
+        .theme-blue .text-primary {
+            color: #2196F3;
+        }
+        .theme-green .text-primary {
+            color: #4CAF50;
+        }
+        .theme-purple .text-primary {
+            color: #9C27B0;
+        }
+        .theme-orange .text-primary {
+            color: #FF9800;
+        }
+
+        body.dark .text-gray-400, body.dark .text-gray-500 {
+            color: #9CA3AF;
+        }
+        
+        /* Layout */
+        .flex {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+        }
+        .flex-col {
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+        }
+        .flex-1 {
+            -webkit-box-flex: 1;
+            -ms-flex: 1 1 0%;
+            flex: 1 1 0%;
+        }
+        .flex-row {
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: row;
+            flex-direction: row;
+        }
+        .items-center {
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+        .justify-center {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+        }
+        .justify-between {
+            -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+        }
+        .justify-around {
+            -ms-flex-pack: distribute;
+            justify-content: space-around;
+        }
+        .justify-end {
+            -webkit-box-pack: end;
+            -ms-flex-pack: end;
+            justify-content: flex-end;
+        }
+        .justify-start {
+            -webkit-box-pack: start;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+        }
+        
+        /* Utilitaires */
+        .hidden {
+            display: none !important;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .h-full {
+            height: 100%;
+        }
+        .max-w-md {
+            max-width: 28rem;
+        }
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .font-bold {
+            font-weight: 700;
+        }
+        .font-medium {
+            font-weight: 500;
+        }
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        .p-2 {
+            padding: 0.5rem;
+        }
+        .p-3 {
+            padding: 0.75rem;
+        }
+        .p-4 {
+            padding: 1rem;
+        }
+        .p-6 {
+            padding: 1.5rem;
+        }
+        .m-2 {
+            margin: 0.5rem;
+        }
+        .m-3 {
+            margin: 0.75rem;
+        }
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        .mt-3 {
+            margin-top: 0.75rem;
+        }
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        .mr-3 {
+            margin-right: 0.75rem;
+        }
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        .ml-3 {
+            margin-left: 0.75rem;
+        }
+        
+        /* Tailles de texte */
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .text-base {
+            font-size: 1rem;
+        }
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        .text-xl {
+            font-size: 1.25rem;
+        }
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+        
+        /* Bordures */
+        .rounded-lg {
+            border-radius: 0.5rem;
+            -webkit-border-radius: 0.5rem;
+        }
+        .rounded-full {
+            border-radius: 9999px;
+            -webkit-border-radius: 9999px;
+        }
+        .border {
+            border-width: 1px;
+            border-style: solid;
+        }
+        .border-t {
+            border-top-width: 1px;
+            border-top-style: solid;
+        }
+        .border-b {
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+        }
+        .border-b-2 {
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+        }
+        .border-gray-200 {
+            border-color: #E5E7EB;
+        }
+        .border-gray-300 {
+            border-color: #D1D5DB;
+        }
+        .border-gray-600 {
+            border-color: #4B5563;
+        }
+        .border-gray-700 {
+            border-color: #374151;
+        }
+        .border-primary {
+            border-color: #5D5CDE;
+        }
+        
+        body.dark .border-gray-200 {
+            border-color: #374151;
+        }
+        body.dark .border-gray-300 {
+            border-color: #4B5563;
+        }
+        
+        /* Ombres */
+        .shadow-md {
+            -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .shadow-lg {
+            -webkit-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Backgrounds */
+        .bg-white {
+            background-color: #FFFFFF;
+        }
+        .bg-gray-100 {
+            background-color: #F3F4F6;
+        }
+        .bg-gray-200 {
+            background-color: #E5E7EB;
+        }
+        .bg-gray-700 {
+            background-color: #374151;
+        }
+        .bg-gray-800 {
+            background-color: #1F2937;
+        }
+        .bg-gray-900 {
+            background-color: #111827;
+        }
+        .bg-primary {
+            background-color: #5D5CDE;
+        }
+        .bg-red-500 {
+            background-color: #EF4444;
+        }
+        .bg-black {
+            background-color: #000000;
+        }
+        .bg-opacity-50 {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        body.dark .bg-white {
+            background-color: #1F2937;
+        }
+        body.dark .bg-gray-100 {
+            background-color: #374151;
+        }
+        body.dark .bg-gray-200 {
+            background-color: #4B5563;
+        }
+        body.dark .bg-gray-800 {
+            background-color: #1F2937;
+        }
+        body.dark .bg-gray-900 {
+            background-color: #111827;
+        }
+        
+        /* Couleurs de texte */
+        .text-white {
+            color: #FFFFFF;
+        }
+        .text-gray-400 {
+            color: #9CA3AF;
+        }
+        .text-gray-500 {
+            color: #6B7280;
+        }
+        .text-gray-800 {
+            color: #1F2937;
+        }
+        .text-red-500 {
+            color: #EF4444;
+        }
+        
+        /* Positionnement */
+        .fixed {
+            position: fixed;
+        }
+        .absolute {
+            position: absolute;
+        }
+        .relative {
+            position: relative;
+        }
+        .inset-0 {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        .top-0 {
+            top: 0;
+        }
+        .bottom-0 {
+            bottom: 0;
+        }
+        .right-0 {
+            right: 0;
+        }
+        .left-0 {
+            left: 0;
+        }
+        .z-40 {
+            z-index: 40;
+        }
+        .z-50 {
+            z-index: 50;
+        }
+        
+        /* Formulaires */
+        input, button {
+            font-family: inherit;
+            font-size: 16px; /* Évite le zoom sur iOS lors de la sélection d'un input */
+            outline: none;
+        }
+        input[type="text"], 
+        input[type="password"], 
+        input[type="email"], 
+        input[type="tel"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            -webkit-border-radius: 0.5rem;
+            border: 1px solid #D1D5DB;
+            background-color: #FFFFFF;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            color: #1F2937;
+        }
+        
+        body.dark input[type="text"], 
+        body.dark input[type="password"], 
+        body.dark input[type="email"], 
+        body.dark input[type="tel"] {
+            background-color: #374151;
+            border-color: #4B5563;
+            color: #F5F5F5;
+        }
+        
+        input[type="text"]:focus, 
+        input[type="password"]:focus, 
+        input[type="email"]:focus, 
+        input[type="tel"]:focus {
+            border-color: #5D5CDE;
+            -webkit-box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
+            box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
+        }
+        
+        button {
+            cursor: pointer;
+            border: none;
+        }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
         /* Animation de chargement */
         .splash-logo {
-            animation: pulse 1.5s infinite alternate;
             -webkit-animation: pulse 1.5s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            100% { transform: scale(1.05); opacity: 1; }
+            animation: pulse 1.5s infinite alternate;
         }
         @-webkit-keyframes pulse {
             0% { -webkit-transform: scale(0.95); opacity: 0.8; }
             100% { -webkit-transform: scale(1.05); opacity: 1; }
         }
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
         
         /* Indicateur de chargement */
         .loading-dots:after {
             content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
             -webkit-animation: dots 1.5s steps(4, end) infinite;
+            animation: dots 1.5s steps(4, end) infinite;
         }
-        @keyframes dots {
+        @-webkit-keyframes dots {
             0%, 20% { opacity: 0; }
             40% { opacity: 0.3; }
             60% { opacity: 0.6; }
             80%, 100% { opacity: 1; }
         }
-        @-webkit-keyframes dots {
+        @keyframes dots {
             0%, 20% { opacity: 0; }
             40% { opacity: 0.3; }
             60% { opacity: 0.6; }
@@ -68,20 +506,31 @@
             margin-bottom: 12px;
             line-height: 1.5;
             position: relative;
-            transition: opacity 0.3s ease;
             -webkit-transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease;
         }
         .chat-bubble.sending {
             opacity: 0.7;
         }
         .chat-bubble.sent {
             border-radius: 18px 18px 0 18px;
+            -webkit-border-radius: 18px 18px 0 18px;
+            background-color: #5D5CDE;
+            color: white;
         }
         .chat-bubble.received {
             border-radius: 18px 18px 18px 0;
+            -webkit-border-radius: 18px 18px 18px 0;
+            background-color: #E5E7EB;
+            color: #1F2937;
         }
         
-        /* Animation d'envoi */
+        body.dark .chat-bubble.received {
+            background-color: #374151;
+            color: #F5F5F5;
+        }
+        
+        /* Envoi animation */
         .sending-indicator {
             position: absolute;
             bottom: -5px;
@@ -89,19 +538,16 @@
             font-size: 0.7rem;
         }
         
-        /* Styles des scrollbars */
+        /* Style scrollbar */
         .hide-scrollbar {
             -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
         }
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
         
-        /* Styles des avatars et conteneurs d'images */
+        /* Avatar style */
         .profile-image-container {
             position: relative;
             width: 100px;
@@ -116,118 +562,156 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
+            -webkit-border-radius: 50%;
+            display: -webkit-box;
+            display: -ms-flexbox;
             display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
             align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
             justify-content: center;
             cursor: pointer;
         }
         .avatar-img {
             width: 100%;
             height: 100%;
+            -o-object-fit: cover;
             object-fit: cover;
             border-radius: 50%;
+            -webkit-border-radius: 50%;
         }
         
-        /* Animation spinner */
+        /* Loader spin */
         .loader {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
+            -webkit-border-radius: 50%;
             border-top: 4px solid #5D5CDE;
             width: 40px;
             height: 40px;
-            animation: spin 1s linear infinite;
             -webkit-animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            animation: spin 1s linear infinite;
         }
         @-webkit-keyframes spin {
             0% { -webkit-transform: rotate(0deg); }
             100% { -webkit-transform: rotate(360deg); }
         }
-        
-        /* Animation de transition entre écrans */
-        .screen-transition {
-            animation: fadeIn 0.3s ease-in-out;
-            -webkit-animation: fadeIn 0.3s ease-in-out;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        
+        /* Screen transition */
+        .screen-transition {
+            -webkit-animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.3s ease-in-out;
         }
         @-webkit-keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         
-        /* Style de la barre de message améliorée */
+        /* Message input style */
         .message-input-container {
+            -webkit-box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             background-color: white;
         }
-        .dark .message-input-container {
+        body.dark .message-input-container {
             background-color: #1E1E1E;
+            -webkit-box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
         }
+        
         .message-input {
             border-radius: 24px;
+            -webkit-border-radius: 24px;
             padding-left: 16px;
             padding-right: 16px;
-            transition: all 0.2s ease;
             -webkit-transition: all 0.2s ease;
+            transition: all 0.2s ease;
         }
         .message-input:focus {
+            -webkit-box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
             box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.3);
         }
+        
         .send-button {
             border-radius: 50%;
+            -webkit-border-radius: 50%;
             width: 40px;
             height: 40px;
+            display: -webkit-box;
+            display: -ms-flexbox;
             display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
             align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
             justify-content: center;
-            transition: all 0.2s ease;
             -webkit-transition: all 0.2s ease;
+            transition: all 0.2s ease;
+            background-color: #5D5CDE;
+            color: white;
         }
         .send-button:active {
-            transform: scale(0.95);
             -webkit-transform: scale(0.95);
+            transform: scale(0.95);
         }
         
-        /* Thèmes personnalisés */
-        .theme-default {
-            --theme-primary: #5D5CDE;
-            --theme-secondary: #7D7CF0;
-            --theme-light-bg: #F8F9FA;
-            --theme-dark-bg: #121212;
+        /* Onglets style */
+        .tabs {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            border-bottom: 1px solid #E5E7EB;
         }
-        .theme-blue {
-            --theme-primary: #2196F3;
-            --theme-secondary: #64B5F6;
-            --theme-light-bg: #E3F2FD;
-            --theme-dark-bg: #0D47A1;
+        .tab {
+            -webkit-box-flex: 1;
+            -ms-flex: 1 1 0%;
+            flex: 1 1 0%;
+            padding: 0.75rem 0;
+            font-weight: 500;
+            text-align: center;
         }
-        .theme-green {
-            --theme-primary: #4CAF50;
-            --theme-secondary: #81C784;
-            --theme-light-bg: #E8F5E9;
-            --theme-dark-bg: #1B5E20;
+        .tab.active {
+            color: #5D5CDE;
+            border-bottom: 2px solid #5D5CDE;
         }
-        .theme-purple {
-            --theme-primary: #9C27B0;
-            --theme-secondary: #BA68C8;
-            --theme-light-bg: #F3E5F5;
-            --theme-dark-bg: #4A148C;
-        }
-        .theme-orange {
-            --theme-primary: #FF9800;
-            --theme-secondary: #FFB74D;
-            --theme-light-bg: #FFF3E0;
-            --theme-dark-bg: #E65100;
+        body.dark .tabs {
+            border-bottom-color: #374151;
         }
         
-        /* Radio Buttons pour sélection de thème */
+        /* Navigation bar */
+        .nav-btn {
+            -webkit-box-flex: 1;
+            -ms-flex: 1 1 0%;
+            flex: 1 1 0%;
+            padding: 0.75rem 0;
+            text-align: center;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+        .nav-btn.active {
+            color: #FFFFFF;
+        }
+        
+        /* Thème radio buttons */
         .theme-radio-label {
             display: inline-block;
             position: relative;
@@ -252,12 +736,25 @@
             width: 25px;
             background-color: #eee;
             border-radius: 50%;
+            -webkit-border-radius: 50%;
         }
         .theme-radio-label:hover input ~ .checkmark {
             background-color: #ccc;
         }
         .theme-radio-label input:checked ~ .checkmark {
-            background-color: var(--theme-primary, #5D5CDE);
+            background-color: #5D5CDE;
+        }
+        .theme-blue .theme-radio-label input:checked ~ .checkmark {
+            background-color: #2196F3;
+        }
+        .theme-green .theme-radio-label input:checked ~ .checkmark {
+            background-color: #4CAF50;
+        }
+        .theme-purple .theme-radio-label input:checked ~ .checkmark {
+            background-color: #9C27B0;
+        }
+        .theme-orange .theme-radio-label input:checked ~ .checkmark {
+            background-color: #FF9800;
         }
         .checkmark:after {
             content: "";
@@ -273,269 +770,444 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
+            -webkit-border-radius: 50%;
             background: white;
+        }
+        
+        /* Grids */
+        .grid {
+            display: -ms-grid;
+            display: grid;
+        }
+        .grid-cols-2 {
+            -ms-grid-columns: 1fr 0.5rem 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .gap-2 {
+            grid-gap: 0.5rem;
+            gap: 0.5rem;
+        }
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+        .space-x-4 > * + * {
+            margin-left: 1rem;
+        }
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .w-6 {
+            width: 1.5rem;
+        }
+        .h-6 {
+            height: 1.5rem;
+        }
+        .w-10 {
+            width: 2.5rem;
+        }
+        .h-10 {
+            height: 2.5rem;
+        }
+        .w-12 {
+            width: 3rem;
+        }
+        .h-12 {
+            height: 3rem;
+        }
+        .w-24 {
+            width: 6rem;
+        }
+        .h-24 {
+            height: 6rem;
+        }
+        .opacity-70 {
+            opacity: 0.7;
+        }
+        
+        .app-container {
+            height: 100%;
+            width: 100%;
+            position: relative;
         }
     </style>
 </head>
 
-<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col theme-default">
-    <!-- Écran de démarrage -->
-    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-gray-900">
-        <div class="text-center">
-            <div class="splash-logo mb-8">
-                <svg class="w-24 h-24 mx-auto text-primary" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
-                    <path d="M10.59 8.59L8 11.17l2.59 2.59L12 12.34l-5-5-5 5h10z"/>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-bold text-primary mb-4">Chat App</h1>
-            <p class="text-gray-500 dark:text-gray-400 mb-2 loading-dots">Chargement</p>
-        </div>
-    </div>
-
-    <!-- Overlay de chargement -->
-    <div id="loading-overlay" class="hidden fixed inset-0 z-40 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <div class="loader mb-4"></div>
-            <p id="loading-text" class="text-gray-800 dark:text-gray-200">Chargement en cours...</p>
-        </div>
-    </div>
-
-    <!-- Écran d'authentification avec onglets -->
-    <div id="auth-screen" class="hidden flex-col items-center justify-center h-full p-4">
-        <div class="w-full max-w-md">
-            <h1 class="text-3xl font-bold text-center mb-6 text-primary">Chat App</h1>
-            
-            <!-- Onglets Connexion/Inscription -->
-            <div class="bg-white dark:bg-gray-800 rounded-t-lg overflow-hidden">
-                <div class="flex border-b border-gray-200 dark:border-gray-700">
-                    <button id="login-tab" class="flex-1 py-3 font-medium text-primary border-b-2 border-primary">Connexion</button>
-                    <button id="register-tab" class="flex-1 py-3 font-medium text-gray-500 dark:text-gray-400">Inscription</button>
-                </div>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-800 rounded-b-lg shadow-md p-6">
-                <!-- Formulaire de connexion -->
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label for="login-username" class="block text-sm font-medium mb-1">Nom d'utilisateur</label>
-                        <input type="text" id="login-username" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <div>
-                        <label for="login-password" class="block text-sm font-medium mb-1">Mot de passe</label>
-                        <input type="password" id="login-password" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-opacity-90 transition">Se connecter</button>
-                </form>
-                
-                <!-- Formulaire d'inscription -->
-                <form id="register-form" class="hidden space-y-4">
-                    <div>
-                        <label for="register-username" class="block text-sm font-medium mb-1">Nom d'utilisateur</label>
-                        <input type="text" id="register-username" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <div>
-                        <label for="register-email" class="block text-sm font-medium mb-1">Adresse e-mail</label>
-                        <input type="email" id="register-email" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <div>
-                        <label for="register-phone" class="block text-sm font-medium mb-1">Numéro de téléphone</label>
-                        <input type="tel" id="register-phone" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <div>
-                        <label for="register-password" class="block text-sm font-medium mb-1">Mot de passe</label>
-                        <input type="password" id="register-password" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <div>
-                        <label for="register-confirm-password" class="block text-sm font-medium mb-1">Confirmer le mot de passe</label>
-                        <input type="password" id="register-confirm-password" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-opacity-90 transition">S'inscrire</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Interface principale de l'application -->
-    <div id="app-container" class="hidden flex-1 flex flex-col h-full">
-        <!-- Écran des conversations -->
-        <div id="conversations-screen" class="flex-1 overflow-hidden flex flex-col screen-transition">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h1 class="text-xl font-bold">Discussions</h1>
-            </div>
-            <div id="conversations-list" class="flex-1 overflow-y-auto hide-scrollbar p-2">
-                <!-- Les conversations seront ajoutées ici -->
-            </div>
-        </div>
-
-        <!-- Écran des utilisateurs -->
-        <div id="users-screen" class="hidden flex-1 overflow-hidden flex flex-col screen-transition">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h1 class="text-xl font-bold">Utilisateurs</h1>
-            </div>
-            <div id="users-list" class="flex-1 overflow-y-auto hide-scrollbar p-2">
-                <!-- Les utilisateurs seront ajoutés ici -->
-            </div>
-        </div>
-
-        <!-- Écran de chat -->
-        <div id="chat-screen" class="hidden flex-1 flex flex-col screen-transition">
-            <div id="chat-header" class="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                <button id="back-to-conversations" class="mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+<body class="theme-default">
+    <div class="app-container">
+        <!-- Écran de démarrage -->
+        <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
+            <div class="text-center">
+                <div class="splash-logo mb-8">
+                    <svg class="w-24 h-24 mx-auto text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                        <path d="M10.59 8.59L8 11.17l2.59 2.59L12 12.34l-5-5-5 5h10z"/>
                     </svg>
-                </button>
-                <div class="flex items-center">
-                    <div id="chat-contact-avatar" class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold mr-3">
-                        <!-- Avatar du contact sera ajouté ici -->
+                </div>
+                <h1 class="text-3xl font-bold text-primary mb-4">Chat App</h1>
+                <p class="text-gray-500 mb-2 loading-dots">Chargement</p>
+            </div>
+        </div>
+
+        <!-- Overlay de chargement -->
+        <div id="loading-overlay" class="hidden fixed inset-0 z-40 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+                <div class="loader mb-4"></div>
+                <p id="loading-text" class="text-gray-800">Chargement en cours...</p>
+            </div>
+        </div>
+
+        <!-- Écran d'authentification avec onglets -->
+        <div id="auth-screen" class="hidden flex-col items-center justify-center h-full p-4">
+            <div class="w-full max-w-md">
+                <h1 class="text-3xl font-bold text-center mb-6 text-primary">Chat App</h1>
+                
+                <!-- Onglets Connexion/Inscription -->
+                <div class="bg-white rounded-lg overflow-hidden">
+                    <div class="tabs">
+                        <button id="login-tab" class="tab active">Connexion</button>
+                        <button id="register-tab" class="tab">Inscription</button>
                     </div>
-                    <div id="chat-contact" class="font-medium"></div>
+                
+                    <div class="p-6 shadow-md">
+                        <!-- Formulaire de connexion -->
+                        <form id="login-form" class="space-y-4">
+                            <div>
+                                <label for="login-username">Nom d'utilisateur</label>
+                                <input type="text" id="login-username" required>
+                            </div>
+                            <div>
+                                <label for="login-password">Mot de passe</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg">Se connecter</button>
+                        </form>
+                        
+                        <!-- Formulaire d'inscription -->
+                        <form id="register-form" class="hidden space-y-4">
+                            <div>
+                                <label for="register-username">Nom d'utilisateur</label>
+                                <input type="text" id="register-username" required>
+                            </div>
+                            <div>
+                                <label for="register-email">Adresse e-mail</label>
+                                <input type="email" id="register-email" required>
+                            </div>
+                            <div>
+                                <label for="register-phone">Numéro de téléphone</label>
+                                <input type="tel" id="register-phone" required>
+                            </div>
+                            <div>
+                                <label for="register-password">Mot de passe</label>
+                                <input type="password" id="register-password" required>
+                            </div>
+                            <div>
+                                <label for="register-confirm-password">Confirmer le mot de passe</label>
+                                <input type="password" id="register-confirm-password" required>
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg">S'inscrire</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-3 bg-lightBg dark:bg-darkBg">
-                <!-- Les messages seront ajoutés ici -->
+        </div>
+
+        <!-- Interface principale de l'application -->
+        <div id="app-container" class="hidden flex-1 flex flex-col h-full">
+            <!-- Écran des conversations -->
+            <div id="conversations-screen" class="flex-1 overflow-hidden flex flex-col screen-transition">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h1 class="text-xl font-bold">Discussions</h1>
+                </div>
+                <div id="conversations-list" class="flex-1 overflow-y-auto hide-scrollbar p-2">
+                    <!-- Les conversations seront ajoutées ici -->
+                </div>
             </div>
-            <div class="message-input-container p-3">
-                <div class="flex items-center">
-                    <input type="text" id="message-input" class="message-input flex-1 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" placeholder="Écrire un message...">
-                    <button id="send-message" class="send-button bg-primary text-white ml-2">
+
+            <!-- Écran des utilisateurs -->
+            <div id="users-screen" class="hidden flex-1 overflow-hidden flex flex-col screen-transition">
+                <div class="p-4 border-b border-gray-200">
+                    <h1 class="text-xl font-bold">Utilisateurs</h1>
+                </div>
+                <div id="users-list" class="flex-1 overflow-y-auto hide-scrollbar p-2">
+                    <!-- Les utilisateurs seront ajoutés ici -->
+                </div>
+            </div>
+
+            <!-- Écran de chat -->
+            <div id="chat-screen" class="hidden flex-1 flex flex-col screen-transition">
+                <div id="chat-header" class="flex items-center p-4 border-b border-gray-200 bg-white">
+                    <button id="back-to-conversations" class="mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Écran de profil -->
-        <div id="profile-screen" class="hidden flex-1 overflow-y-auto p-4 screen-transition">
-            <div class="max-w-md mx-auto">
-                <h1 class="text-xl font-bold mb-6">Mon Profil</h1>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4">
-                    <div class="flex items-center justify-center mb-6">
-                        <div class="profile-image-container">
-                            <div id="profile-avatar" class="h-full w-full rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                                <!-- Photo de profil ou initiale sera ajoutée ici -->
-                            </div>
-                            <div class="edit-overlay" id="change-avatar">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
+                    <div class="flex items-center">
+                        <div id="chat-contact-avatar" class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold mr-3">
+                            <!-- Avatar du contact sera ajouté ici -->
                         </div>
-                    </div>
-                    <input type="file" id="avatar-upload" accept="image/*" class="hidden">
-                    <div id="profile-info" class="space-y-4">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Nom d'utilisateur</p>
-                            <p id="profile-username" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                            <p id="profile-email" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
-                            <p id="profile-phone" class="font-medium"></p>
-                        </div>
+                        <div id="chat-contact" class="font-medium"></div>
                     </div>
                 </div>
-
-                <!-- Section des thèmes -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4">
-                    <h2 class="text-lg font-semibold mb-4">Thème de l'application</h2>
-                    
-                    <!-- Thème sombre/clair -->
-                    <div class="mb-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Mode</p>
-                        <div class="flex space-x-4">
-                            <label class="theme-radio-label">
-                                <input type="radio" name="color-mode" value="light" id="light-mode">
-                                <span class="checkmark"></span>
-                                Clair
-                            </label>
-                            <label class="theme-radio-label">
-                                <input type="radio" name="color-mode" value="dark" id="dark-mode">
-                                <span class="checkmark"></span>
-                                Sombre
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Couleur de thème -->
-                    <div class="mb-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Couleur</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="theme-radio-label">
-                                <input type="radio" name="theme-color" value="default" checked>
-                                <span class="checkmark" style="background-color: #5D5CDE;"></span>
-                                Violet
-                            </label>
-                            <label class="theme-radio-label">
-                                <input type="radio" name="theme-color" value="blue">
-                                <span class="checkmark" style="background-color: #2196F3;"></span>
-                                Bleu
-                            </label>
-                            <label class="theme-radio-label">
-                                <input type="radio" name="theme-color" value="green">
-                                <span class="checkmark" style="background-color: #4CAF50;"></span>
-                                Vert
-                            </label>
-                            <label class="theme-radio-label">
-                                <input type="radio" name="theme-color" value="orange">
-                                <span class="checkmark" style="background-color: #FF9800;"></span>
-                                Orange
-                            </label>
-                            <label class="theme-radio-label">
-                                <input type="radio" name="theme-color" value="purple">
-                                <span class="checkmark" style="background-color: #9C27B0;"></span>
-                                Magenta
-                            </label>
-                        </div>
-                    </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto hide-scrollbar p-4 bg-gray-100">
+                    <!-- Les messages seront ajoutés ici -->
                 </div>
-
-                <!-- Boutons d'action -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                    <div class="space-y-3">
-                        <button id="logout-button" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-opacity-90 transition">Se déconnecter</button>
-                        <button id="delete-account-button" class="w-full bg-red-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-600 transition">Supprimer mon compte</button>
+                <div class="message-input-container p-3">
+                    <div class="flex items-center">
+                        <input type="text" id="message-input" class="message-input flex-1 py-3 border border-gray-300 text-base" placeholder="Écrire un message...">
+                        <button id="send-message" class="send-button ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Barre de navigation (masquée pendant les discussions) -->
-        <div id="navigation-bar" class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex justify-around">
-                <button class="nav-btn flex-1 py-3 text-center flex flex-col items-center" data-screen="conversations-screen">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                    <span class="text-xs mt-1">Discussions</span>
-                </button>
-                <button class="nav-btn flex-1 py-3 text-center flex flex-col items-center" data-screen="users-screen">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span class="text-xs mt-1">Utilisateurs</span>
-                </button>
-                <button class="nav-btn flex-1 py-3 text-center flex flex-col items-center" data-screen="profile-screen">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span class="text-xs mt-1">Profil</span>
-                </button>
+            <!-- Écran de profil -->
+            <div id="profile-screen" class="hidden flex-1 overflow-y-auto p-4 screen-transition">
+                <div class="max-w-md mx-auto">
+                    <h1 class="text-xl font-bold mb-6">Mon Profil</h1>
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                        <div class="flex items-center justify-center mb-6">
+                            <div class="profile-image-container">
+                                <div id="profile-avatar" class="h-full w-full rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                                    <!-- Photo de profil ou initiale sera ajoutée ici -->
+                                </div>
+                                <div class="edit-overlay" id="change-avatar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                        <div id="profile-info" class="space-y-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Nom d'utilisateur</p>
+                                <p id="profile-username" class="font-medium"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p id="profile-email" class="font-medium"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Téléphone</p>
+                                <p id="profile-phone" class="font-medium"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section des thèmes -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                        <h2 class="text-lg font-semibold mb-4">Thème de l'application</h2>
+                        
+                        <!-- Thème sombre/clair -->
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 mb-2">Mode</p>
+                            <div class="flex space-x-4">
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="color-mode" value="light" id="light-mode">
+                                    <span class="checkmark"></span>
+                                    Clair
+                                </label>
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="color-mode" value="dark" id="dark-mode">
+                                    <span class="checkmark"></span>
+                                    Sombre
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Couleur de thème -->
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 mb-2">Couleur</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="theme-color" value="default" checked>
+                                    <span class="checkmark" style="background-color: #5D5CDE;"></span>
+                                    Violet
+                                </label>
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="theme-color" value="blue">
+                                    <span class="checkmark" style="background-color: #2196F3;"></span>
+                                    Bleu
+                                </label>
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="theme-color" value="green">
+                                    <span class="checkmark" style="background-color: #4CAF50;"></span>
+                                    Vert
+                                </label>
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="theme-color" value="orange">
+                                    <span class="checkmark" style="background-color: #FF9800;"></span>
+                                    Orange
+                                </label>
+                                <label class="theme-radio-label">
+                                    <input type="radio" name="theme-color" value="purple">
+                                    <span class="checkmark" style="background-color: #9C27B0;"></span>
+                                    Magenta
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="space-y-3">
+                            <button id="logout-button" class="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg">Se déconnecter</button>
+                            <button id="delete-account-button" class="w-full bg-red-500 text-white font-medium py-2 px-4 rounded-lg">Supprimer mon compte</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barre de navigation (masquée pendant les discussions) -->
+            <div id="navigation-bar" class="bg-white border-t border-gray-200">
+                <div class="flex justify-around">
+                    <button class="nav-btn active" data-screen="conversations-screen">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        <span class="text-xs mt-1">Discussions</span>
+                    </button>
+                    <button class="nav-btn" data-screen="users-screen">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Utilisateurs</span>
+                    </button>
+                    <button class="nav-btn" data-screen="profile-screen">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-xs mt-1">Profil</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Script JavaScript -->
     <script>
+        // Polyfill pour Array.from pour iOS 12
+        if (!Array.from) {
+            Array.from = function(iterable) {
+                if (iterable == null) {
+                    throw new TypeError("Array.from requires an array-like object");
+                }
+                var arr = [];
+                for (var i = 0; i < iterable.length; i++) {
+                    arr.push(iterable[i]);
+                }
+                return arr;
+            };
+        }
+
+        // Polyfill pour includes pour iOS 12
+        if (!Array.prototype.includes) {
+            Array.prototype.includes = function(searchElement, fromIndex) {
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+                var o = Object(this);
+                var len = o.length >>> 0;
+                if (len === 0) return false;
+                var n = fromIndex | 0;
+                var k = Math.max(n >= 0 ? n : len + n, 0);
+                while (k < len) {
+                    if (o[k] === searchElement) return true;
+                    k++;
+                }
+                return false;
+            };
+        }
+
+        // Polyfill pour find pour iOS 12
+        if (!Array.prototype.find) {
+            Array.prototype.find = function(predicate) {
+                if (this == null) {
+                    throw new TypeError('Array.prototype.find called on null or undefined');
+                }
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+                var list = Object(this);
+                var length = list.length >>> 0;
+                var thisArg = arguments[1];
+                var value;
+                
+                for (var i = 0; i < length; i++) {
+                    value = list[i];
+                    if (predicate.call(thisArg, value, i, list)) {
+                        return value;
+                    }
+                }
+                return undefined;
+            };
+        }
+
+        // Polyfill pour findIndex pour iOS 12
+        if (!Array.prototype.findIndex) {
+            Array.prototype.findIndex = function(predicate) {
+                if (this == null) {
+                    throw new TypeError('Array.prototype.findIndex called on null or undefined');
+                }
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+                var list = Object(this);
+                var length = list.length >>> 0;
+                var thisArg = arguments[1];
+                var value;
+                
+                for (var i = 0; i < length; i++) {
+                    value = list[i];
+                    if (predicate.call(thisArg, value, i, list)) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+        }
+
+        // Polyfill pour Object.assign pour iOS 12
+        if (typeof Object.assign !== 'function') {
+            Object.assign = function(target) {
+                if (target == null) {
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+                
+                var to = Object(target);
+                
+                for (var index = 1; index < arguments.length; index++) {
+                    var nextSource = arguments[index];
+                    
+                    if (nextSource != null) {
+                        for (var nextKey in nextSource) {
+                            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                                to[nextKey] = nextSource[nextKey];
+                            }
+                        }
+                    }
+                }
+                return to;
+            };
+        }
+
         // Données utilisateurs et conversations intégrées au code
-        const INITIAL_DATA = {
+        var INITIAL_DATA = {
             users: [
                 { 
                     id: 1, 
@@ -584,9 +1256,9 @@
         };
 
         // Variables globales pour les données de l'application
-        let appData = {
-            users: [...INITIAL_DATA.users],
-            conversations: [...INITIAL_DATA.conversations],
+        var appData = {
+            users: INITIAL_DATA.users.slice(),
+            conversations: INITIAL_DATA.conversations.slice(),
             currentUser: null,
             sessionId: null,
             theme: {
@@ -596,7 +1268,7 @@
         };
 
         // Éléments DOM
-        const elements = {
+        var elements = {
             splashScreen: document.getElementById('splash-screen'),
             loadingOverlay: document.getElementById('loading-overlay'),
             loadingText: document.getElementById('loading-text'),
@@ -641,36 +1313,59 @@
         };
 
         // Module de gestion des utilisateurs
-        const UserManager = {
-            login(username, password) {
-                const user = appData.users.find(u => u.username === username && u.password === password);
+        var UserManager = {
+            login: function(username, password) {
+                var user = null;
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].username === username && appData.users[i].password === password) {
+                        user = appData.users[i];
+                        break;
+                    }
+                }
+                
                 if (user) {
                     appData.currentUser = user;
                     appData.sessionId = user.id; // Garder l'ID de session
-                    return { success: true, user };
+                    return { success: true, user: user };
                 }
                 return { success: false, message: 'Identifiants incorrects' };
             },
 
-            register(username, email, phone, password) {
+            register: function(username, email, phone, password) {
                 // Vérification si l'utilisateur existe déjà
-                if (appData.users.some(u => u.username === username)) {
+                var usernameExists = false;
+                var emailExists = false;
+                var phoneExists = false;
+                
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].username === username) {
+                        usernameExists = true;
+                    }
+                    if (appData.users[i].email === email) {
+                        emailExists = true;
+                    }
+                    if (appData.users[i].phone === phone) {
+                        phoneExists = true;
+                    }
+                }
+                
+                if (usernameExists) {
                     return { success: false, message: 'Ce nom d\'utilisateur est déjà pris' };
                 }
-                if (appData.users.some(u => u.email === email)) {
+                if (emailExists) {
                     return { success: false, message: 'Cette adresse email est déjà utilisée' };
                 }
-                if (appData.users.some(u => u.phone === phone)) {
+                if (phoneExists) {
                     return { success: false, message: 'Ce numéro de téléphone est déjà utilisé' };
                 }
 
                 // Création du nouvel utilisateur
-                const newUser = {
+                var newUser = {
                     id: this.getNextUserId(),
-                    username,
-                    email,
-                    phone,
-                    password,
+                    username: username,
+                    email: email,
+                    phone: phone,
+                    password: password,
                     avatar: null
                 };
 
@@ -682,31 +1377,45 @@
                 return { success: true, user: newUser };
             },
 
-            getNextUserId() {
-                return appData.users.length ? Math.max(...appData.users.map(u => u.id)) + 1 : 1;
+            getNextUserId: function() {
+                var maxId = 0;
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].id > maxId) {
+                        maxId = appData.users[i].id;
+                    }
+                }
+                return maxId + 1;
             },
 
-            updateAvatar(userId, avatarData) {
-                const user = appData.users.find(u => u.id === userId);
-                if (user) {
-                    user.avatar = avatarData;
-                    if (appData.currentUser && appData.currentUser.id === userId) {
-                        appData.currentUser.avatar = avatarData;
+            updateAvatar: function(userId, avatarData) {
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].id === userId) {
+                        appData.users[i].avatar = avatarData;
+                        if (appData.currentUser && appData.currentUser.id === userId) {
+                            appData.currentUser.avatar = avatarData;
+                        }
+                        return true;
                     }
-                    return true;
                 }
                 return false;
             },
 
-            deleteAccount(userId) {
-                const index = appData.users.findIndex(u => u.id === userId);
+            deleteAccount: function(userId) {
+                var index = -1;
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].id === userId) {
+                        index = i;
+                        break;
+                    }
+                }
+                
                 if (index !== -1) {
                     appData.users.splice(index, 1);
                     
                     // Supprimer les conversations associées
-                    appData.conversations = appData.conversations.filter(c => 
-                        !c.participants.includes(userId)
-                    );
+                    appData.conversations = appData.conversations.filter(function(c) {
+                        return !c.participants.includes(userId);
+                    });
                     
                     appData.currentUser = null;
                     appData.sessionId = null;
@@ -715,31 +1424,47 @@
                 return false;
             },
 
-            logout() {
+            logout: function() {
                 appData.currentUser = null;
                 appData.sessionId = null;
             },
 
-            getAllUsers() {
-                return [...appData.users];
+            getAllUsers: function() {
+                return appData.users.slice();
             },
 
-            getOtherUsers() {
-                return appData.users.filter(u => u.id !== appData.currentUser?.id);
+            getOtherUsers: function() {
+                var result = [];
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.currentUser && appData.users[i].id !== appData.currentUser.id) {
+                        result.push(appData.users[i]);
+                    }
+                }
+                return result;
             },
 
-            getUserById(userId) {
-                return appData.users.find(u => u.id === userId);
+            getUserById: function(userId) {
+                for (var i = 0; i < appData.users.length; i++) {
+                    if (appData.users[i].id === userId) {
+                        return appData.users[i];
+                    }
+                }
+                return null;
             }
         };
 
         // Module de gestion des conversations
-        const ConversationManager = {
-            getConversation(userId1, userId2) {
+        var ConversationManager = {
+            getConversation: function(userId1, userId2) {
                 // Rechercher une conversation existante
-                let conversation = appData.conversations.find(c => 
-                    c.participants.includes(userId1) && c.participants.includes(userId2)
-                );
+                var conversation = null;
+                for (var i = 0; i < appData.conversations.length; i++) {
+                    var conv = appData.conversations[i];
+                    if (conv.participants.includes(userId1) && conv.participants.includes(userId2)) {
+                        conversation = conv;
+                        break;
+                    }
+                }
 
                 // Si aucune conversation n'existe, en créer une
                 if (!conversation) {
@@ -754,59 +1479,88 @@
                 return this.processConversation(conversation);
             },
 
-            processConversation(conversation) {
-                // Convertir les timestamps en objets Date
-                return {
-                    ...conversation,
-                    messages: conversation.messages.map(msg => ({
-                        ...msg,
-                        timestamp: new Date(msg.timestamp)
-                    }))
+            processConversation: function(conversation) {
+                // Cloner l'objet conversation
+                var result = {
+                    id: conversation.id,
+                    participants: conversation.participants.slice(),
+                    messages: []
                 };
+                
+                // Convertir les timestamps en objets Date
+                for (var i = 0; i < conversation.messages.length; i++) {
+                    var msg = conversation.messages[i];
+                    result.messages.push({
+                        id: msg.id,
+                        senderId: msg.senderId,
+                        text: msg.text,
+                        timestamp: new Date(msg.timestamp)
+                    });
+                }
+                
+                return result;
             },
 
-            getNextConversationId() {
-                return appData.conversations.length ? Math.max(...appData.conversations.map(c => c.id)) + 1 : 1;
-            },
-
-            getNextMessageId() {
-                let maxId = 0;
-                appData.conversations.forEach(conv => {
-                    if (conv.messages.length) {
-                        const convMaxId = Math.max(...conv.messages.map(m => m.id || 0));
-                        maxId = Math.max(maxId, convMaxId);
+            getNextConversationId: function() {
+                var maxId = 0;
+                for (var i = 0; i < appData.conversations.length; i++) {
+                    if (appData.conversations[i].id > maxId) {
+                        maxId = appData.conversations[i].id;
                     }
-                });
+                }
+                return maxId + 1;
+            },
+
+            getNextMessageId: function() {
+                var maxId = 0;
+                for (var i = 0; i < appData.conversations.length; i++) {
+                    var conv = appData.conversations[i];
+                    for (var j = 0; j < conv.messages.length; j++) {
+                        var msgId = conv.messages[j].id || 0;
+                        if (msgId > maxId) {
+                            maxId = msgId;
+                        }
+                    }
+                }
                 return maxId + 1;
             },
 
             // Ajoute un message et l'ajoute immédiatement à la conversation
-            addMessage(userId1, userId2, senderId, text) {
+            addMessage: function(userId1, userId2, senderId, text) {
                 // Créer le message
-                const message = {
+                var message = {
                     id: this.getNextMessageId(),
-                    senderId,
-                    text,
+                    senderId: senderId,
+                    text: text,
                     timestamp: new Date()
                 };
                 
                 // Trouver et mettre à jour la conversation immédiatement
-                const conversation = appData.conversations.find(c => 
-                    c.participants.includes(userId1) && c.participants.includes(userId2)
-                );
+                var conversation = null;
+                for (var i = 0; i < appData.conversations.length; i++) {
+                    var conv = appData.conversations[i];
+                    if (conv.participants.includes(userId1) && conv.participants.includes(userId2)) {
+                        conversation = conv;
+                        break;
+                    }
+                }
                 
                 if (conversation) {
                     conversation.messages.push({
-                        ...message,
+                        id: message.id,
+                        senderId: message.senderId,
+                        text: message.text,
                         timestamp: message.timestamp.toISOString()
                     });
                 } else {
                     // Créer une nouvelle conversation si nécessaire
-                    const newConversation = {
+                    var newConversation = {
                         id: this.getNextConversationId(),
                         participants: [userId1, userId2],
                         messages: [{
-                            ...message,
+                            id: message.id,
+                            senderId: message.senderId,
+                            text: message.text,
                             timestamp: message.timestamp.toISOString()
                         }]
                     };
@@ -816,14 +1570,19 @@
                 return message;
             },
 
-            getUserConversations(userId) {
-                return appData.conversations
-                    .filter(c => c.participants.includes(userId))
-                    .map(c => this.processConversation(c));
+            getUserConversations: function(userId) {
+                var result = [];
+                for (var i = 0; i < appData.conversations.length; i++) {
+                    var conv = appData.conversations[i];
+                    if (conv.participants.includes(userId)) {
+                        result.push(this.processConversation(conv));
+                    }
+                }
+                return result;
             },
 
-            getLastMessage(userId1, userId2) {
-                const conversation = this.getConversation(userId1, userId2);
+            getLastMessage: function(userId1, userId2) {
+                var conversation = this.getConversation(userId1, userId2);
                 if (conversation.messages.length > 0) {
                     return conversation.messages[conversation.messages.length - 1];
                 }
@@ -832,19 +1591,10 @@
         };
 
         // Module de gestion des thèmes
-        const ThemeManager = {
-            init() {
-                // Vérifier le mode sombre/clair du système
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    this.setDarkMode(true);
-                } else {
-                    this.setDarkMode(false);
-                }
-                
-                // Écouter les changements de thème du système
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                    this.setDarkMode(event.matches);
-                });
+        var ThemeManager = {
+            init: function() {
+                // Vérifier les préférences système pour le mode sombre/clair
+                this.detectSystemTheme();
                 
                 // Initialiser les boutons radio
                 if (appData.theme.mode === 'dark') {
@@ -854,17 +1604,48 @@
                 }
                 
                 // Initialiser le thème de couleur
-                document.querySelectorAll('input[name="theme-color"]').forEach(input => {
-                    if (input.value === appData.theme.color) {
-                        input.checked = true;
+                for (var i = 0; i < elements.themeColors.length; i++) {
+                    if (elements.themeColors[i].value === appData.theme.color) {
+                        elements.themeColors[i].checked = true;
                     }
-                });
+                }
                 
                 // Appliquer le thème actuel
                 this.applyTheme();
             },
             
-            setDarkMode(isDark) {
+            // Méthode de détection du thème système compatible avec iOS 12
+            detectSystemTheme: function() {
+                try {
+                    // Tentative d'utilisation de matchMedia si disponible
+                    if (window.matchMedia) {
+                        var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        this.setDarkMode(isDarkMode);
+                        
+                        // Essayer d'ajouter un listener pour les changements de préférence
+                        try {
+                            window.matchMedia('(prefers-color-scheme: dark)').addListener(function(e) {
+                                ThemeManager.setDarkMode(e.matches);
+                            });
+                        } catch(e) {
+                            // iOS 12 n'a pas addListener, on utilise addEventListener comme fallback
+                            try {
+                                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                                    ThemeManager.setDarkMode(e.matches);
+                                });
+                            } catch(err) {
+                                // Si tout échoue, on reste sur le thème par défaut
+                                console.log("Impossible de détecter les changements de thème système");
+                            }
+                        }
+                    }
+                } catch(e) {
+                    // Si matchMedia n'est pas disponible ou échoue, utiliser la valeur par défaut
+                    console.log("Impossible de détecter le thème système");
+                }
+            },
+            
+            setDarkMode: function(isDark) {
                 appData.theme.mode = isDark ? 'dark' : 'light';
                 this.applyTheme();
                 
@@ -876,171 +1657,179 @@
                 }
             },
             
-            setThemeColor(color) {
+            setThemeColor: function(color) {
                 appData.theme.color = color;
                 this.applyTheme();
             },
             
-            applyTheme() {
+            applyTheme: function() {
                 // Appliquer le mode sombre/clair
                 if (appData.theme.mode === 'dark') {
-                    document.documentElement.classList.add('dark');
+                    document.body.classList.add('dark');
                 } else {
-                    document.documentElement.classList.remove('dark');
+                    document.body.classList.remove('dark');
                 }
                 
                 // Appliquer la couleur du thème
-                document.body.className = document.body.className.replace(/theme-\w+/, '');
-                document.body.classList.add(`theme-${appData.theme.color}`);
+                document.body.className = document.body.className.replace(/theme-\w+/g, '');
+                document.body.classList.add('theme-' + appData.theme.color);
             }
         };
 
         // Fonctions utilitaires pour l'interface
-        const UI = {
-            showLoading(message = "Chargement en cours...") {
+        var UI = {
+            showLoading: function(message) {
+                if (!message) message = "Chargement en cours...";
                 elements.loadingText.textContent = message;
                 elements.loadingOverlay.classList.remove('hidden');
             },
 
-            hideLoading() {
+            hideLoading: function() {
                 elements.loadingOverlay.classList.add('hidden');
             },
 
-            updateProfileInfo() {
+            updateProfileInfo: function() {
                 if (appData.currentUser) {
                     elements.profileUsername.textContent = appData.currentUser.username;
                     elements.profileEmail.textContent = appData.currentUser.email || 'Non renseigné';
                     elements.profilePhone.textContent = appData.currentUser.phone || 'Non renseigné';
                     
                     if (appData.currentUser.avatar) {
-                        elements.profileAvatar.innerHTML = `<img src="${appData.currentUser.avatar}" alt="Avatar" class="avatar-img">`;
+                        elements.profileAvatar.innerHTML = '<img src="' + appData.currentUser.avatar + '" alt="Avatar" class="avatar-img">';
                     } else {
                         elements.profileAvatar.innerHTML = appData.currentUser.username.charAt(0).toUpperCase();
                     }
                 }
             },
 
-            renderConversations() {
+            renderConversations: function() {
                 if (!appData.currentUser) return;
                 
                 elements.conversationsList.innerHTML = '';
-                const users = UserManager.getOtherUsers();
+                var users = UserManager.getOtherUsers();
                 
                 if (users.length === 0) {
-                    elements.conversationsList.innerHTML = '<p class="text-center p-4 text-gray-500 dark:text-gray-400">Aucun contact disponible</p>';
+                    elements.conversationsList.innerHTML = '<p class="text-center p-4 text-gray-500">Aucun contact disponible</p>';
                     return;
                 }
                 
-                users.forEach(user => {
-                    const lastMessage = ConversationManager.getLastMessage(appData.currentUser.id, user.id);
+                for (var i = 0; i < users.length; i++) {
+                    var user = users[i];
+                    var lastMessage = ConversationManager.getLastMessage(appData.currentUser.id, user.id);
                     
-                    const contactEl = document.createElement('div');
-                    contactEl.className = 'p-3 mb-2 border border-gray-200 dark:border-gray-700 flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer';
+                    var contactEl = document.createElement('div');
+                    contactEl.className = 'p-3 mb-2 border border-gray-200 flex items-center hover:bg-gray-100 rounded-lg';
+                    contactEl.style.cursor = 'pointer';
                     
-                    let avatarContent = '';
+                    var avatarContent = '';
                     if (user.avatar) {
-                        avatarContent = `<img src="${user.avatar}" alt="${user.username}" class="h-12 w-12 rounded-full object-cover">`;
+                        avatarContent = '<img src="' + user.avatar + '" alt="' + user.username + '" class="h-12 w-12 rounded-full" style="object-fit: cover;">';
                     } else {
-                        avatarContent = `<div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                            ${user.username.charAt(0).toUpperCase()}
-                        </div>`;
+                        avatarContent = '<div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">' +
+                            user.username.charAt(0).toUpperCase() +
+                        '</div>';
                     }
                     
-                    contactEl.innerHTML = `
-                        ${avatarContent}
-                        <div class="ml-3 flex-1">
-                            <div class="font-medium">${user.username}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                ${lastMessage ? lastMessage.text : 'Aucun message'}
-                            </div>
-                        </div>
-                    `;
+                    contactEl.innerHTML =
+                        avatarContent +
+                        '<div class="ml-3 flex-1">' +
+                            '<div class="font-medium">' + user.username + '</div>' +
+                            '<div class="text-sm text-gray-500 truncate">' +
+                                (lastMessage ? lastMessage.text : 'Aucun message') +
+                            '</div>' +
+                        '</div>';
                     
-                    contactEl.addEventListener('click', () => {
-                        this.openChat(user);
-                    });
+                    // IIFE pour préserver la référence à l'utilisateur pour chaque contactEl
+                    (function(userObj) {
+                        contactEl.addEventListener('click', function() {
+                            UI.openChat(userObj);
+                        });
+                    })(user);
                     
                     elements.conversationsList.appendChild(contactEl);
-                });
+                }
             },
 
-            renderAllUsers() {
+            renderAllUsers: function() {
                 elements.usersList.innerHTML = '';
-                const allUsers = UserManager.getAllUsers();
+                var allUsers = UserManager.getAllUsers();
                 
                 if (allUsers.length === 0) {
-                    elements.usersList.innerHTML = '<p class="text-center p-4 text-gray-500 dark:text-gray-400">Aucun utilisateur inscrit</p>';
+                    elements.usersList.innerHTML = '<p class="text-center p-4 text-gray-500">Aucun utilisateur inscrit</p>';
                     return;
                 }
                 
-                allUsers.forEach(user => {
-                    const userEl = document.createElement('div');
-                    userEl.className = 'p-3 mb-2 border border-gray-200 dark:border-gray-700 flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg';
+                for (var i = 0; i < allUsers.length; i++) {
+                    var user = allUsers[i];
+                    var userEl = document.createElement('div');
+                    userEl.className = 'p-3 mb-2 border border-gray-200 flex items-center hover:bg-gray-100 rounded-lg';
                     
-                    let avatarContent = '';
+                    var avatarContent = '';
                     if (user.avatar) {
-                        avatarContent = `<img src="${user.avatar}" alt="${user.username}" class="h-12 w-12 rounded-full object-cover">`;
+                        avatarContent = '<img src="' + user.avatar + '" alt="' + user.username + '" class="h-12 w-12 rounded-full" style="object-fit: cover;">';
                     } else {
-                        avatarContent = `<div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                            ${user.username.charAt(0).toUpperCase()}
-                        </div>`;
+                        avatarContent = '<div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">' +
+                            user.username.charAt(0).toUpperCase() +
+                        '</div>';
                     }
                     
-                    const isCurrentUser = appData.currentUser && user.id === appData.currentUser.id;
+                    var isCurrentUser = appData.currentUser && user.id === appData.currentUser.id;
                     
-                    userEl.innerHTML = `
-                        ${avatarContent}
-                        <div class="ml-3 flex-1">
-                            <div class="font-medium">${user.username} ${isCurrentUser ? '(Vous)' : ''}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                ${user.email || 'Email non disponible'}
-                            </div>
-                        </div>
-                        ${!isCurrentUser ? `
-                        <button class="start-chat-btn px-3 py-1 bg-primary text-white rounded-lg text-sm" data-user-id="${user.id}">
-                            Discuter
-                        </button>` : ''}
-                    `;
+                    userEl.innerHTML =
+                        avatarContent +
+                        '<div class="ml-3 flex-1">' +
+                            '<div class="font-medium">' + user.username + ' ' + (isCurrentUser ? '(Vous)' : '') + '</div>' +
+                            '<div class="text-sm text-gray-500">' +
+                                (user.email || 'Email non disponible') +
+                            '</div>' +
+                        '</div>' +
+                        (!isCurrentUser ? 
+                        '<button class="start-chat-btn px-3 py-1 bg-primary text-white rounded-lg text-sm" data-user-id="' + user.id + '">' +
+                            'Discuter' +
+                        '</button>' : '');
                     
                     elements.usersList.appendChild(userEl);
-                });
+                }
                 
                 // Ajouter des gestionnaires d'événements pour les boutons "Discuter"
-                document.querySelectorAll('.start-chat-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const userId = parseInt(e.currentTarget.dataset.userId);
-                        const user = UserManager.getUserById(userId);
-                        if (user) {
-                            this.openChat(user);
-                        }
-                    });
-                });
+                var startChatButtons = document.querySelectorAll('.start-chat-btn');
+                for (var j = 0; j < startChatButtons.length; j++) {
+                    (function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            var userId = parseInt(btn.getAttribute('data-user-id'));
+                            var user = UserManager.getUserById(userId);
+                            if (user) {
+                                UI.openChat(user);
+                            }
+                        });
+                    })(startChatButtons[j]);
+                }
             },
 
-            openChat(contact) {
+            openChat: function(contact) {
                 this.showLoading("Chargement de la conversation...");
                 
-                setTimeout(() => {
+                setTimeout(function() {
                     try {
                         // Mettre à jour l'en-tête de la conversation
                         elements.chatContact.textContent = contact.username;
                         
                         // Afficher l'avatar du contact
                         if (contact.avatar) {
-                            elements.chatContactAvatar.innerHTML = `<img src="${contact.avatar}" alt="${contact.username}" class="h-10 w-10 rounded-full object-cover">`;
+                            elements.chatContactAvatar.innerHTML = '<img src="' + contact.avatar + '" alt="' + contact.username + '" class="h-10 w-10 rounded-full" style="object-fit: cover;">';
                         } else {
                             elements.chatContactAvatar.innerHTML = contact.username.charAt(0).toUpperCase();
                         }
                         
                         // Stocker le contact sélectionné
-                        elements.appContainer.dataset.currentContact = contact.id;
+                        elements.appContainer.setAttribute('data-current-contact', contact.id);
                         
                         // Afficher l'écran de chat, masquer les autres et la barre de navigation
-                        this.showScreen('chat-screen');
+                        UI.showScreen('chat-screen');
                         elements.navigationBar.classList.add('hidden');
                         
                         // Afficher les messages
-                        this.renderMessages(contact.id);
+                        UI.renderMessages(contact.id);
                         
                         // Focus sur le champ de saisie de message
                         elements.messageInput.focus();
@@ -1048,47 +1837,46 @@
                         console.error("Erreur lors de l'ouverture de la conversation:", error);
                         alert("Une erreur s'est produite lors du chargement de la conversation.");
                     } finally {
-                        this.hideLoading();
+                        UI.hideLoading();
                     }
                 }, 300);
             },
 
-            renderMessages(contactId) {
+            renderMessages: function(contactId) {
                 elements.chatMessages.innerHTML = '';
-                const conversation = ConversationManager.getConversation(appData.currentUser.id, parseInt(contactId));
+                var conversation = ConversationManager.getConversation(appData.currentUser.id, parseInt(contactId));
                 
                 if (conversation.messages.length === 0) {
-                    elements.chatMessages.innerHTML = '<p class="text-center p-4 text-gray-500 dark:text-gray-400">Aucun message. Commencez la conversation !</p>';
+                    elements.chatMessages.innerHTML = '<p class="text-center p-4 text-gray-500">Aucun message. Commencez la conversation !</p>';
                     return;
                 }
                 
-                conversation.messages.forEach(message => {
-                    this.addMessageToUI(message);
-                });
+                for (var i = 0; i < conversation.messages.length; i++) {
+                    this.addMessageToUI(conversation.messages[i]);
+                }
                 
                 // Défiler vers le bas
                 elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
             },
             
             // Ajoute un message au DOM
-            addMessageToUI(message, isSending = false) {
-                const isSent = message.senderId === appData.currentUser.id;
+            addMessageToUI: function(message, isSending) {
+                var isSent = message.senderId === appData.currentUser.id;
                 
-                const messageEl = document.createElement('div');
-                messageEl.className = `flex ${isSent ? 'justify-end' : 'justify-start'}`;
-                messageEl.id = `msg-${message.id || Date.now()}`;
+                var messageEl = document.createElement('div');
+                messageEl.className = 'flex ' + (isSent ? 'justify-end' : 'justify-start');
+                messageEl.id = 'msg-' + (message.id || Date.now());
                 
-                const timestamp = message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp);
+                var timestamp = message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp);
                 
-                const sendingIndicator = isSending ? '<span class="sending-indicator">Envoi...</span>' : '';
+                var sendingIndicator = isSending ? '<span class="sending-indicator">Envoi...</span>' : '';
                 
-                messageEl.innerHTML = `
-                    <div class="chat-bubble ${isSent ? 'sent bg-primary text-white' : 'received bg-gray-200 dark:bg-gray-700'} px-4 py-2 ${isSending ? 'sending' : ''}">
-                        <div>${message.text}</div>
-                        <div class="text-xs mt-1 opacity-70">${this.formatTime(timestamp)}</div>
-                        ${sendingIndicator}
-                    </div>
-                `;
+                messageEl.innerHTML =
+                    '<div class="chat-bubble ' + (isSent ? 'sent' : 'received') + ' px-4 py-2 ' + (isSending ? 'sending' : '') + '">' +
+                        '<div>' + message.text + '</div>' +
+                        '<div class="text-xs mt-1 opacity-70">' + this.formatTime(timestamp) + '</div>' +
+                        sendingIndicator +
+                    '</div>';
                 
                 elements.chatMessages.appendChild(messageEl);
                 
@@ -1097,22 +1885,29 @@
 
                 // Si le message était en cours d'envoi, marquer comme envoyé après un court délai
                 if (isSending) {
-                    setTimeout(() => {
-                        const bubble = messageEl.querySelector('.chat-bubble');
+                    setTimeout(function() {
+                        var bubble = messageEl.querySelector('.chat-bubble');
                         if (bubble) {
                             bubble.classList.remove('sending');
-                            const indicator = bubble.querySelector('.sending-indicator');
-                            if (indicator) indicator.remove();
+                            var indicator = bubble.querySelector('.sending-indicator');
+                            if (indicator) indicator.parentNode.removeChild(indicator);
                         }
                     }, 500);
                 }
             },
 
-            formatTime(timestamp) {
-                return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            formatTime: function(timestamp) {
+                var hours = timestamp.getHours();
+                var minutes = timestamp.getMinutes();
+                
+                // Ajouter un zéro devant si nécessaire
+                hours = hours < 10 ? '0' + hours : hours;
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                
+                return hours + ':' + minutes;
             },
 
-            showScreen(screenId) {
+            showScreen: function(screenId) {
                 // Masquer tous les écrans
                 elements.conversationsScreen.classList.add('hidden');
                 elements.chatScreen.classList.add('hidden');
@@ -1128,92 +1923,96 @@
                 }
                 
                 // Mettre à jour le bouton de navigation actif
-                elements.navButtons.forEach(btn => {
-                    const screen = btn.getAttribute('data-screen');
+                for (var i = 0; i < elements.navButtons.length; i++) {
+                    var btn = elements.navButtons[i];
+                    var screen = btn.getAttribute('data-screen');
                     if (screen === screenId) {
-                        btn.classList.add('text-primary');
+                        btn.classList.add('active');
                     } else {
-                        btn.classList.remove('text-primary');
+                        btn.classList.remove('active');
                     }
-                });
+                }
             },
 
-            compressImage(dataUrl, maxWidth, maxHeight, callback) {
-                const img = new Image();
+            compressImage: function(dataUrl, maxWidth, maxHeight, callback) {
+                var img = new Image();
                 img.src = dataUrl;
                 img.onload = function() {
-                    let width = img.width;
-                    let height = img.height;
+                    var width = img.width;
+                    var height = img.height;
                     
                     // Redimensionner si nécessaire
                     if (width > maxWidth || height > maxHeight) {
-                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        var ratio = Math.min(maxWidth / width, maxHeight / height);
                         width = Math.floor(width * ratio);
                         height = Math.floor(height * ratio);
                     }
                     
-                    const canvas = document.createElement('canvas');
+                    var canvas = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
-                    const ctx = canvas.getContext('2d');
+                    var ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
                     // Convertir en JPEG avec compression pour réduire la taille
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    callback(compressedDataUrl);
+                    try {
+                        var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        callback(compressedDataUrl);
+                    } catch (e) {
+                        // Fallback en cas d'erreur (possible sur iOS 12)
+                        callback(dataUrl);
+                    }
                 };
             }
         };
 
         // Validation de formulaire
-        const Validator = {
-            validateEmail(email) {
-                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var Validator = {
+            validateEmail: function(email) {
+                var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return regex.test(email);
             },
             
-            validatePhone(phone) {
+            validatePhone: function(phone) {
                 // Format français: 10 chiffres avec ou sans espaces/tirets, peut commencer par +33 ou 0
-                const regex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
+                var regex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
                 return regex.test(phone);
             },
             
-            validatePassword(password, confirmPassword) {
+            validatePassword: function(password, confirmPassword) {
                 return password === confirmPassword;
             }
         };
 
         // Gestion des onglets de connexion/inscription
-        elements.loginTab.addEventListener('click', () => {
-            elements.loginTab.classList.add('text-primary', 'border-b-2', 'border-primary');
-            elements.registerTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
-            elements.registerTab.classList.add('text-gray-500', 'dark:text-gray-400');
+        elements.loginTab.addEventListener('click', function() {
+            elements.loginTab.classList.add('active');
+            elements.registerTab.classList.remove('active');
             
             elements.loginForm.classList.remove('hidden');
             elements.registerForm.classList.add('hidden');
         });
 
-        elements.registerTab.addEventListener('click', () => {
-            elements.registerTab.classList.add('text-primary', 'border-b-2', 'border-primary');
-            elements.loginTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
-            elements.loginTab.classList.add('text-gray-500', 'dark:text-gray-400');
+        elements.registerTab.addEventListener('click', function() {
+            elements.registerTab.classList.add('active');
+            elements.loginTab.classList.remove('active');
             
             elements.registerForm.classList.remove('hidden');
             elements.loginForm.classList.add('hidden');
         });
 
         // Gestion formulaire de connexion
-        elements.loginForm.addEventListener('submit', (e) => {
+        elements.loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = elements.loginUsername.value.trim();
-            const password = elements.loginPassword.value;
+            var username = elements.loginUsername.value.trim();
+            var password = elements.loginPassword.value;
             
             UI.showLoading("Connexion en cours...");
             
-            setTimeout(() => {
+            setTimeout(function() {
                 try {
-                    const result = UserManager.login(username, password);
+                    var result = UserManager.login(username, password);
                     
                     if (result.success) {
                         // Afficher l'application
@@ -1240,37 +2039,40 @@
         });
 
         // Gestion formulaire d'inscription
-        elements.registerForm.addEventListener('submit', (e) => {
+        elements.registerForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = elements.registerUsername.value.trim();
-            const email = elements.registerEmail.value.trim();
-            const phone = elements.registerPhone.value.trim();
-            const password = elements.registerPassword.value;
-            const confirmPassword = elements.registerConfirmPassword.value;
+            var username = elements.registerUsername.value.trim();
+            var email = elements.registerEmail.value.trim();
+            var phone = elements.registerPhone.value.trim();
+            var password = elements.registerPassword.value;
+            var confirmPassword = elements.registerConfirmPassword.value;
             
             UI.showLoading("Création du compte...");
             
-            setTimeout(() => {
+            setTimeout(function() {
                 try {
                     // Validation des champs
                     if (!Validator.validateEmail(email)) {
                         alert('Veuillez entrer une adresse email valide');
+                        UI.hideLoading();
                         return;
                     }
                     
                     if (!Validator.validatePhone(phone)) {
                         alert('Veuillez entrer un numéro de téléphone valide');
+                        UI.hideLoading();
                         return;
                     }
                     
                     if (!Validator.validatePassword(password, confirmPassword)) {
                         alert('Les mots de passe ne correspondent pas');
+                        UI.hideLoading();
                         return;
                     }
                     
                     // Créer le compte
-                    const result = UserManager.register(username, email, phone, password);
+                    var result = UserManager.register(username, email, phone, password);
                     
                     if (result.success) {
                         // Afficher l'application
@@ -1299,15 +2101,15 @@
 
         // Gestion de l'envoi de messages
         elements.sendMessage.addEventListener('click', sendMessageHandler);
-        elements.messageInput.addEventListener('keydown', (e) => {
+        elements.messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 sendMessageHandler();
             }
         });
 
         function sendMessageHandler() {
-            const text = elements.messageInput.value.trim();
-            const contactId = parseInt(elements.appContainer.dataset.currentContact);
+            var text = elements.messageInput.value.trim();
+            var contactId = parseInt(elements.appContainer.getAttribute('data-current-contact'));
             
             if (text && contactId) {
                 // Désactiver le bouton d'envoi pendant le traitement
@@ -1315,7 +2117,7 @@
                 
                 try {
                     // Créer le message temporaire pour l'affichage
-                    const tempMessage = {
+                    var tempMessage = {
                         id: Date.now(),
                         senderId: appData.currentUser.id,
                         text: text,
@@ -1347,19 +2149,19 @@
         }
 
         // Gestion du bouton de retour dans la conversation
-        elements.backToConversations.addEventListener('click', () => {
+        elements.backToConversations.addEventListener('click', function() {
             UI.showScreen('conversations-screen');
             elements.navigationBar.classList.remove('hidden');
             UI.renderConversations();
         });
 
         // Gestion de la modification de l'avatar
-        elements.changeAvatar.addEventListener('click', () => {
+        elements.changeAvatar.addEventListener('click', function() {
             elements.avatarUpload.click();
         });
 
-        elements.avatarUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+        elements.avatarUpload.addEventListener('change', function(e) {
+            var file = e.target.files[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) { // 2MB max
                     alert('La taille de l\'image ne doit pas dépasser 2MB');
@@ -1368,12 +2170,12 @@
                 
                 UI.showLoading("Traitement de l'image en cours...");
                 
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const avatarData = event.target.result;
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var avatarData = event.target.result;
                     
                     // Compresser l'image
-                    UI.compressImage(avatarData, 300, 300, (compressedImage) => {
+                    UI.compressImage(avatarData, 300, 300, function(compressedImage) {
                         try {
                             UserManager.updateAvatar(appData.currentUser.id, compressedImage);
                             UI.updateProfileInfo();
@@ -1392,28 +2194,30 @@
         });
 
         // Gestion des thèmes
-        elements.lightMode.addEventListener('change', () => {
+        elements.lightMode.addEventListener('change', function() {
             if (elements.lightMode.checked) {
                 ThemeManager.setDarkMode(false);
             }
         });
 
-        elements.darkMode.addEventListener('change', () => {
+        elements.darkMode.addEventListener('change', function() {
             if (elements.darkMode.checked) {
                 ThemeManager.setDarkMode(true);
             }
         });
 
-        elements.themeColors.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (radio.checked) {
-                    ThemeManager.setThemeColor(radio.value);
-                }
-            });
-        });
+        for (var i = 0; i < elements.themeColors.length; i++) {
+            (function(radio) {
+                radio.addEventListener('change', function() {
+                    if (radio.checked) {
+                        ThemeManager.setThemeColor(radio.value);
+                    }
+                });
+            })(elements.themeColors[i]);
+        }
 
         // Gestion de la déconnexion
-        elements.logoutButton.addEventListener('click', () => {
+        elements.logoutButton.addEventListener('click', function() {
             UserManager.logout();
             elements.appContainer.classList.add('hidden');
             elements.appContainer.classList.remove('flex');
@@ -1422,11 +2226,11 @@
         });
 
         // Gestion de la suppression du compte
-        elements.deleteAccountButton.addEventListener('click', () => {
-            if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+        elements.deleteAccountButton.addEventListener('click', function() {
+            if (window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
                 UI.showLoading("Suppression du compte en cours...");
                 
-                setTimeout(() => {
+                setTimeout(function() {
                     try {
                         // Supprimer le compte
                         UserManager.deleteAccount(appData.currentUser.id);
@@ -1449,33 +2253,35 @@
         });
 
         // Gestion de la navigation
-        elements.navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const screenId = btn.getAttribute('data-screen');
-                UI.showScreen(screenId);
-                
-                // Actualiser les listes si nécessaire
-                if (screenId === 'conversations-screen') {
-                    UI.renderConversations();
-                }
-                
-                if (screenId === 'users-screen') {
-                    UI.renderAllUsers();
-                }
-            });
-        });
+        for (var i = 0; i < elements.navButtons.length; i++) {
+            (function(btn) {
+                btn.addEventListener('click', function() {
+                    var screenId = btn.getAttribute('data-screen');
+                    UI.showScreen(screenId);
+                    
+                    // Actualiser les listes si nécessaire
+                    if (screenId === 'conversations-screen') {
+                        UI.renderConversations();
+                    }
+                    
+                    if (screenId === 'users-screen') {
+                        UI.renderAllUsers();
+                    }
+                });
+            })(elements.navButtons[i]);
+        }
 
         // Initialisation de l'application
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             // Initialiser le thème
             ThemeManager.init();
             
             // Afficher l'animation de lancement
-            setTimeout(() => {
+            setTimeout(function() {
                 elements.splashScreen.style.opacity = '0';
                 elements.splashScreen.style.transition = 'opacity 0.5s ease-out';
                 
-                setTimeout(() => {
+                setTimeout(function() {
                     elements.splashScreen.classList.add('hidden');
                     elements.authScreen.classList.remove('hidden');
                     elements.authScreen.classList.add('flex');
